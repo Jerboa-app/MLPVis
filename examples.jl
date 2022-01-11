@@ -1,5 +1,7 @@
 using Flux, GLMakie, PerceptualColourMaps, ProgressMeter, Distributions
 
+include("visualisation.jl")
+
 # comment out these two lines to watch live, it's faster without though
 GLMakie.set_window_config!(framerate = Inf, vsync = false)
 GLMakie.inline!(true)
