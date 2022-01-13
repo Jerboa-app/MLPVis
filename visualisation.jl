@@ -12,11 +12,13 @@ end
     Train model on data, against the loss. Plots the network (nodes/edges) with colours
     representing the relative connection strength (blue = negative, white = 0, red = positive)
     compared to all others (biases and weights done separately).
+
     Plots the current performance on data as well.
+
     Saves an mp4 of the process.
 """
 function WatchNetwork(model::Flux.Chain,data, loss::Function, truth; Epochs = 100, opt=Descent(0.01),
-        debug=false,minwidth=1.0,maxwidth=4.0,res=(1920/2,1080/2),fig=nothing, neuron_colour=RGBAf0(0,0,0,1),
+        debug=false,minwidth=1.0,maxwidth=4.0,res=(1920,1080),fig=nothing, neuron_colour=RGBAf0(0,0,0,1),
         bias_colour=RGBAf0(0.5,0.5,0.5,1),fps=60,titlesize=30,filename="Makie.mp4"
 )::GLMakie.Figure
 
