@@ -1,10 +1,38 @@
-using Flux, GLMakie, PerceptualColourMaps, ProgressMeter, Distributions
+using Flux, PerceptualColourMaps, ProgressMeter, Distributions, ArgParse
+
+# change to CairoMakie if without gpu
+# tried an if-else but that borked my Julia for some reason...
+# (ERROR: LoadError: InitError: could not load library libharfbuzz-gobject.so")
+using GLMakie
+
+s = ArgParseSettings()
+
+@add_arg_table! s begin
+    "--resolution-upscaling"
+    help = "Modifier to 1920x1080:\n -2 = 480x270,\n -1 = 960x540,\n 1 = 1920x1080 (DEFAULT),\n 2 = 3840x2160"
+    arg_type = Int
+    default = 1
+end
+
+Arguments = parse_args(s)
+
+@info Arguments
+
+scale = Arguments["resolution-upscaling"]
+res = (1920,1080)
+if res == -2
+    res = (480,270)
+elseif res == -1
+    res = (960,540)
+elseif res == 2
+    res = (3840,2160)
+end
 
 include("visualisation.jl")
 
-# comment out these two lines to watch live, it's faster without though
-GLMakie.set_window_config!(framerate = Inf, vsync = false)
-GLMakie.inline!(true)
+# comment out these two lines to watch live, it's much faster without though
+set_window_config!(framerate = Inf, vsync = false)
+inline!(true)
 
 fps = 5
 # 1D
