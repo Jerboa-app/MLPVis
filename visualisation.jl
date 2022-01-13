@@ -20,17 +20,17 @@ end
 function WatchNetwork(model::Flux.Chain,data, loss::Function, truth; Epochs = 100, opt=Descent(0.01),
         debug=false,minwidth=1.0,maxwidth=4.0,res=(1920,1080),fig=nothing, neuron_colour=RGBAf0(0,0,0,1),
         bias_colour=RGBAf0(0.5,0.5,0.5,1),fps=60,titlesize=30,filename="Makie.mp4"
-)::GLMakie.Figure
+)::Figure
 
-    fig = GLMakie.Figure(resolution=res,fontsize=titlesize)
+    fig = Figure(resolution=res,fontsize=titlesize)
 
     main_title = Node("Network") # will update to track epochs
-    axes = [GLMakie.Axis(fig[1,1],title=main_title)]
+    axes = [Axis(fig[1,1],title=main_title)]
 
     title = Node("")
 
     if data != nothing
-        push!(axes,GLMakie.Axis(fig[1,2],title=title))
+        push!(axes,Axis(fig[1,2],title=title))
     end
 
     time_ = Node(1)
@@ -47,6 +47,7 @@ function WatchNetwork(model::Flux.Chain,data, loss::Function, truth; Epochs = 10
     for layer in model.layers
         if !(typeof(layer)<:Flux.Dense)
             @warn "Model must only have Dense layers"
+	    @info "If your model has a function at the end\n like softmax, put it into the loss"
             @assert typeof(layer)<:Flux.Dense
         end
     end
@@ -195,12 +196,10 @@ function WatchNetwork(model::Flux.Chain,data, loss::Function, truth; Epochs = 10
     nColours = Node(nColours);
     bColours = Node(bColours);
 
-    @show ConnectionStrength[]
-
     # plot neurons, biases, and weights
-    GLMakie.scatter!(axes[1],Neurons,color=nColours,markersize=(neuron_size,neuron_size),markerspace=SceneSpace)
-    GLMakie.scatter!(axes[1],Biases,color=bColours,markersize=(bias_size,bias_size),markerspace=SceneSpace)
-    GLMakie.linesegments!(axes[1],Connections,linewidth=ConnectionStrength,color=ConnectionColour)
+    scatter!(axes[1],Neurons,color=nColours,markersize=(neuron_size,neuron_size),markerspace=SceneSpace)
+    scatter!(axes[1],Biases,color=bColours,markersize=(bias_size,bias_size),markerspace=SceneSpace)
+    linesegments!(axes[1],Connections,linewidth=ConnectionStrength,color=ConnectionColour)
 
     ns = maximum([max(l[1],l[2]) for l in Ns])
 
@@ -251,8 +250,8 @@ function WatchNetwork(model::Flux.Chain,data, loss::Function, truth; Epochs = 10
         p = [model(data[i][1])[1] for i in 1:length(data)]|>Node
         if data != nothing
             x = [data[i][1][1] for i in 1:length(data)]
-            GLMakie.scatter!(axes[2],x,truth)
-            GLMakie.lines!(axes[2],x,p,linewidth=2.0,color="red")
+            scatter!(axes[2],x,truth)
+            lines!(axes[2],x,p,linewidth=2.0,color="red")
             e = sum([loss(model,data[i][1],data[i][2]) for i in 1:length(data)])/length(data)
             title[]="Error: $(round(e,digits=5))"
         end
@@ -274,12 +273,12 @@ function WatchNetwork(model::Flux.Chain,data, loss::Function, truth; Epochs = 10
                     push!(col,c[i,j])
                 end
             end
-            push!(axes,GLMakie.Axis(
+            push!(axes,Axis(
                 fig[1,3],title="Goal"
             ))
             axes[3].aspect = AxisAspect(1)
             hidedecorations!(axes[3])
-            GLMakie.scatter!(axes[3],pos,marker=Rect2D(0,0,1,1), # like a heatmap
+            scatter!(axes[3],pos,marker=Rect2D(0,0,1,1), # like a heatmap
                     markersize=(1,1),markerspace=SceneSpace,
                     color = col
             )
@@ -295,7 +294,7 @@ function WatchNetwork(model::Flux.Chain,data, loss::Function, truth; Epochs = 10
             end
             pos=Node(pos)
             col = Node(col)
-            GLMakie.scatter!(axes[2],pos,marker=Rect2D(0,0,1,1),
+            scatter!(axes[2],pos,marker=Rect2D(0,0,1,1),
                 markersize=(1,1),markerspace=SceneSpace,
                 color = col
             )
@@ -310,7 +309,7 @@ function WatchNetwork(model::Flux.Chain,data, loss::Function, truth; Epochs = 10
 
     # now begin training and recording
 
-    GLMakie.record(fig, filename, collect(2:Epochs), framerate=fps) do k
+    record(fig, filename, collect(2:Epochs), framerate=fps) do k
 
         # train 1 epoch
         Flux.train!((x,y)->loss(model,x,y),Flux.params(model),data,opt)
